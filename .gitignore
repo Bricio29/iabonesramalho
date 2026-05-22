@@ -1,0 +1,9 @@
+node_modules/
+.env
+.wwebjs_cache/
+database.json
+*.log
+.DS_Store
+
+# Manter a pasta de autenticação para não precisar reconectar
+# .wwebjs_auth/

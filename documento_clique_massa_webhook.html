@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atualização Técnica — Integração ClickMassa Webhook</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, Helvetica, sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      line-height: 1.7;
+    }
+
+    .page {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+      overflow: hidden;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      padding: 48px 52px 40px;
+      color: #fff;
+      position: relative;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #e94560, #f5a623, #e94560);
+    }
+    .header .badge {
+      display: inline-block;
+      background: rgba(233, 69, 96, 0.2);
+      border: 1px solid rgba(233, 69, 96, 0.5);
+      color: #ff8fa3;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+    .header h1 span { color: #f5a623; }
+    .header p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+    }
+    .header .meta {
+      margin-top: 20px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .header .meta-item {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+    }
+    .header .meta-item strong {
+      color: rgba(255,255,255,0.9);
+      font-weight: 500;
+    }
+
+    /* BODY */
+    .body { padding: 44px 52px; }
+
+    /* INTRO */
+    .intro-box {
+      background: #f0f4ff;
+      border-left: 4px solid #4361ee;
+      border-radius: 0 8px 8px 0;
+      padding: 18px 22px;
+      margin-bottom: 36px;
+      font-size: 14px;
+      color: #2d3a6e;
+      line-height: 1.7;
+    }
+
+    /* SECTION */
+    .section { margin-bottom: 40px; }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: #e94560;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    /* CARDS */
+    .card {
+      border: 1px solid #e8e8e8;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 14px;
+      background: #fafafa;
+    }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+    .card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .icon-blue  { background: #e8f0fe; }
+    .icon-green { background: #e6f4ea; }
+    .icon-orange{ background: #fff3e0; }
+    .icon-purple{ background: #f3e8fd; }
+    .icon-red   { background: #fde8e8; }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 2px;
+    }
+    .card-subtitle {
+      font-size: 12px;
+      color: #888;
+    }
+    .card ul {
+      list-style: none;
+      margin-top: 4px;
+    }
+    .card ul li {
+      font-size: 13.5px;
+      color: #444;
+      padding: 3px 0;
+      padding-left: 18px;
+      position: relative;
+    }
+    .card ul li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #34a853;
+      font-weight: 700;
+    }
+
+    /* STATUS GRID */
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media print {
+      .status-grid {
+        display: table;
+        width: 100%;
+        border-spacing: 6px;
+      }
+      .status-grid::after {
+        content: '';
+        display: table-caption;
+      }
+      .status-card {
+        display: table-cell;
+        width: 50%;
+        vertical-align: top;
+      }
+    }
+    .status-card {
+      border-radius: 10px;
+      padding: 16px 18px;
+      border: 1px solid #e8e8e8;
+    }
+    .status-card.done   { background: #f0fdf4; border-color: #86efac; }
+    .status-card.pending{ background: #fff7ed; border-color: #fdba74; }
+
+    .status-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .status-card.done   .status-label { color: #16a34a; }
+    .status-card.pending .status-label { color: #ea580c; }
+
+    .status-card p {
+      font-size: 13px;
+      color: #333;
+    }
+
+    /* STEPS */
+    .steps { counter-reset: step; }
+    .step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 22px;
+      align-items: flex-start;
+    }
+    .step-number {
+      counter-increment: step;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-content { flex: 1; }
+    .step-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+    .step-desc {
+      font-size: 13px;
+      color: #555;
+    }
+    .step-desc code {
+      background: #f0f0f0;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #c7254e;
+    }
+
+    /* ENV TABLE */
+    .env-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .env-table th {
+      background: #1a1a2e;
+      color: #fff;
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+    }
+    .env-table th:first-child { border-radius: 8px 0 0 0; }
+    .env-table th:last-child  { border-radius: 0 8px 0 0; }
+    .env-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+    }
+    .env-table tr:last-child td { border-bottom: none; }
+    .env-table tr:nth-child(even) td { background: #fafafa; }
+    .env-tag {
+      font-family: 'Courier New', monospace;
+      background: #f0f0f0;
+      border-radius: 4px;
+      padding: 2px 7px;
+      color: #c7254e;
+      font-size: 12px;
+    }
+    .required-tag {
+      background: #fee2e2;
+      color: #dc2626;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .optional-tag {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    /* ALERT */
+    .alert {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin-top: 28px;
+      margin-bottom: 10px;
+    }
+    .alert.info    { background: #eff6ff; border: 1px solid #bfdbfe; }
+    .alert.warning { background: #fffbeb; border: 1px solid #fde68a; }
+    .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .alert p   { font-size: 13px; color: #374151; line-height: 1.6; }
+    .alert strong { color: #1a1a1a; }
+
+    /* FOOTER */
+    .footer {
+      background: #1a1a2e;
+      padding: 24px 52px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer p { font-size: 12px; color: rgba(255,255,255,0.45); }
+    .footer strong { color: rgba(255,255,255,0.7); }
+
+    /* DIVIDER */
+    .divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 32px 0;
+    }
+
+    /* PRINT / PDF */
+    @media print {
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      body { background: #fff; }
+      .page {
+        box-shadow: none;
+        margin: 0;
+        border-radius: 0;
+        max-width: 100%;
+        width: 100%;
+      }
+      .header { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .footer { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .status-card { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; page-break-inside: avoid; }
+      .card { page-break-inside: avoid; }
+      .step { page-break-inside: avoid; }
+      .env-table { page-break-inside: avoid; }
+      .status-grid { page-break-inside: avoid; }
+      .alert { page-break-inside: avoid; }
+    }
+
+    /* Garante cores no PDF mesmo fora do @media print */
+    * {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="badge">Relatório Técnico de Atualização</div>
+      <h1>Integração com <span>ClickMassa</span> via Webhook</h1>
+      <p>Bot de Atendimento Inteligente — Bonés Ramalho</p>
+      <div class="meta">
+        <div class="meta-item"><strong>Projeto:</strong> Bot WhatsApp — Bonés Ramalho</div>
+        <div class="meta-item"><strong>Data:</strong> Março de 2026</div>
+        <div class="meta-item"><strong>Status:</strong> Em implementação</div>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="body">
+
+      <div class="intro-box">
+        Este documento detalha todas as alterações técnicas realizadas no sistema de atendimento automático para viabilizar a integração com a plataforma <strong>ClickMassa</strong> através do protocolo <strong>Webhook</strong>, bem como as etapas ainda necessárias para que a solução entre em operação completa.
+      </div>
+
+      <!-- O QUE FOI FEITO -->
+      <div class="section">
+        <div class="section-title">O que foi implementado</div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon icon-blue">🔄</div>
+            <div>
+              <div class="card-title">Migração de Arquitetura</div>
+              <div class="card-subtitle">De biblioteca local para integração via API</div>
+            </div>
+          </div>
+          <ul>
+            <li>O sistema foi migrado de uma integração por biblioteca (que exigia QR Code manual) para uma arquitetura modern baseada em <strong>API + Webhook</strong></li>
+            <li>O bot agora opera como um servidor web independente, pronto para receber eventos do ClickMassa em tempo real</li>
+            <li>Eliminada a necessidade de manter sessão local do WhatsApp Web ativa no servidor</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon icon-green">📡</div>
+            <div>
+              <div class="card-title">Endpoint de Webhook Implementado</div>
+              <div class="card-subtitle">Rota <code style="font-size:12px;background:#eafaf1;color:#1a5c36;padding:2px 6px;border-radius:4px;">POST /webhook</code> — servidor Express.js na porta 3000</div>
+            </div>
+          </div>
+          <ul>
+            <li>Servidor HTTP criado para receber todos os eventos de mensagens enviados pelo ClickMassa</li>
+            <li>Resposta imediata com status <strong>200 OK</strong> ao ClickMassa para evitar timeouts e reenvios duplicados</li>
+            <li>Processamento assíncrono das mensagens após a confirmação — garante performance e estabilidade</li>
+            <li>Rota de <strong>healthcheck</strong> (<code style="font-size:12px;background:#f0f0f0;color:#555;padding:1px 5px;border-radius:3px;">GET /health</code>) para monitoramento do serviço</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon icon-purple">🔐</div>
+            <div>
+              <div class="card-title">Autenticação e Segurança</div>
+              <div class="card-subtitle">Validação de token nas requisições recebidas</div>
+            </div>
+          </div>
+          <ul>
+            <li>Implementada validação por <strong>token secreto</strong> nos headers de cada requisição recebida</li>
+            <li>Requisições sem token válido são rejeitadas com status <strong>401 Unauthorized</strong></li>
+            <li>Mensagens originadas do próprio bot são automaticamente ignoradas (sem loop de respostas)</li>
+            <li>Mensagens de grupos são descartadas — o bot atende apenas conversas individuais</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon icon-orange">📨</div>
+            <div>
+              <div class="card-title">Suporte a Todos os Tipos de Mensagem</div>
+              <div class="card-subtitle">Texto, imagem, áudio e documento</div>
+            </div>
+          </div>
+          <ul>
+            <li><strong>Mensagens de texto</strong> — resposta inteligente via IA (OpenAI GPT)</li>
+            <li><strong>Áudios / mensagens de voz</strong> — transcrição automática e resposta contextualizada</li>
+            <li><strong>Imagens</strong> — recebimento e processamento via base64</li>
+            <li><strong>Documentos</strong> — recebimento e identificação do tipo de arquivo</li>
+            <li>Compatibilidade com o formato <strong>Evolution API</strong>, padrão utilizado nas integrações ClickMassa</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon icon-blue">📤</div>
+            <div>
+              <div class="card-title">Envio de Respostas via API do ClickMassa</div>
+              <div class="card-subtitle">Texto, imagens de catálogo e indicador de digitação</div>
+            </div>
+          </div>
+          <ul>
+            <li>Função de envio de <strong>texto</strong> via endpoint <code style="font-size:12px;background:#f0f0f0;color:#555;padding:1px 5px;border-radius:3px;">/message/sendText/{instância}</code></li>
+            <li>Função de envio de <strong>imagens do catálogo</strong> em base64 via <code style="font-size:12px;background:#f0f0f0;color:#555;padding:1px 5px;border-radius:3px;">/message/sendMedia/{instância}</code></li>
+            <li>Indicador de <strong>"digitando..."</strong> antes de cada resposta via <code style="font-size:12px;background:#f0f0f0;color:#555;padding:1px 5px;border-radius:3px;">/chat/sendPresence/{instância}</code></li>
+            <li>Autenticação nas chamadas à API via header <code style="font-size:12px;background:#f0f0f0;color:#555;padding:1px 5px;border-radius:3px;">apikey: {token}</code></li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon icon-green">🧠</div>
+            <div>
+              <div class="card-title">Inteligência Artificial Integrada</div>
+              <div class="card-subtitle">Mantida toda a lógica de atendimento existente</div>
+            </div>
+          </div>
+          <ul>
+            <li>Toda a base de conhecimento sobre os bonés, modelos, preços e técnicas foi mantida</li>
+            <li>Histórico de conversa por cliente preservado em banco de dados local (database.json)</li>
+            <li>Envio automático de fotos do catálogo quando o cliente informa o objetivo de uso</li>
+            <li>Notificação automática para a equipe interna quando um lead qualificado é identificado</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- SITUAÇÃO ATUAL -->
+      <div class="section">
+        <div class="section-title">Situação atual — o que está pronto e o que falta</div>
+        <div class="status-grid">
+          <div class="status-card done">
+            <div class="status-label">✅ Concluído</div>
+            <p>Código do servidor e webhook totalmente desenvolvido e revisado</p>
+          </div>
+          <div class="status-card done">
+            <div class="status-label">✅ Concluído</div>
+            <p>Lógica de parsing de mensagens para formato ClickMassa (Evolution API)</p>
+          </div>
+          <div class="status-card done">
+            <div class="status-label">✅ Concluído</div>
+            <p>Funções de envio de texto, imagens e indicador de digitação via API</p>
+          </div>
+          <div class="status-card done">
+            <div class="status-label">✅ Concluído</div>
+            <p>Segurança com validação de token e filtro de mensagens do próprio bot</p>
+          </div>
+          <div class="status-card pending">
+            <div class="status-label">⏳ Aguardando</div>
+            <p>Credenciais do ClickMassa: URL da API, Token e nome da instância</p>
+          </div>
+          <div class="status-card pending">
+            <div class="status-label">⏳ Aguardando</div>
+            <p>Configuração do Webhook no painel do ClickMassa apontando para o servidor</p>
+          </div>
+          <div class="status-card pending">
+            <div class="status-label">⏳ Aguardando</div>
+            <p>Servidor com IP público ou domínio para recepção dos eventos</p>
+          </div>
+          <div class="status-card pending">
+            <div class="status-label">⏳ Aguardando</div>
+            <p>Validação final em ambiente de produção com fluxo de mensagens reais</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- O QUE PRECISA SER FEITO -->
+      <div class="section">
+        <div class="section-title">O que precisa ser feito para entrar em funcionamento</div>
+
+        <div class="steps">
+
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-title">Configurar as variáveis de ambiente no servidor</div>
+              <div class="step-desc">
+                Criar o arquivo <code>.env</code> no servidor com as credenciais do ClickMassa e da OpenAI. 
+                Todas as variáveis marcadas como obrigatórias precisam estar preenchidas corretamente para o bot funcionar.
+              </div>
+            </div>
+          </div>
+
+          <table class="env-table">
+            <thead>
+              <tr>
+                <th>Variável</th>
+                <th>Descrição</th>
+                <th>Tipo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="env-tag">CM_API_URL</span></td>
+                <td>URL base da API do ClickMassa — ex: <code style="font-size:11px;color:#555;">https://api.clickmassa.com.br</code></td>
+                <td><span class="required-tag">Obrigatório</span></td>
+              </tr>
+              <tr>
+                <td><span class="env-tag">CM_TOKEN</span></td>
+                <td>Token / API Key gerado no painel do ClickMassa</td>
+                <td><span class="required-tag">Obrigatório</span></td>
+              </tr>
+              <tr>
+                <td><span class="env-tag">CM_INSTANCE</span></td>
+                <td>Nome da instância/sessão do WhatsApp no ClickMassa</td>
+                <td><span class="required-tag">Obrigatório</span></td>
+              </tr>
+              <tr>
+                <td><span class="env-tag">OPENAI_API_KEY</span></td>
+                <td>Chave da API OpenAI para funcionamento da IA</td>
+                <td><span class="required-tag">Obrigatório</span></td>
+              </tr>
+              <tr>
+                <td><span class="env-tag">EQUIPE_NUMERO</span></td>
+                <td>Número do WhatsApp da equipe para notificações de leads (ex: <code style="font-size:11px;color:#555;">5584999999999</code>)</td>
+                <td><span class="required-tag">Obrigatório</span></td>
+              </tr>
+              <tr>
+                <td><span class="env-tag">WEBHOOK_SECRET</span></td>
+                <td>Token secreto para validar que as requisições vêm do ClickMassa</td>
+                <td><span class="optional-tag">Recomendado</span></td>
+              </tr>
+              <tr>
+                <td><span class="env-tag">PORT</span></td>
+                <td>Porta do servidor (padrão: 3000)</td>
+                <td><span class="optional-tag">Opcional</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <br/>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-title">Subir o servidor em um ambiente com IP público</div>
+              <div class="step-desc">
+                O ClickMassa precisa conseguir acessar o servidor para entregar os eventos de mensagem. 
+                O servidor deve estar online com endereço acessível pela internet — seja um IP público fixo, um domínio ou um túnel seguro (ex: ngrok para testes).
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <div class="step-title">Configurar o Webhook no painel do ClickMassa</div>
+              <div class="step-desc">
+                No painel de administração do ClickMassa, na instância correspondente, cadastrar a URL do webhook apontando para o servidor:<br/><br/>
+                <code>http://&lt;IP_DO_SERVIDOR&gt;:3000/webhook</code><br/><br/>
+                Habilitar os eventos de <strong>mensagens recebidas</strong> (<code>messages.upsert</code>). 
+                Se o painel suportar header de segurança, configurar com o mesmo valor definido em <code>WEBHOOK_SECRET</code>.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <div class="step-title">Instalar dependências e iniciar o servidor</div>
+              <div class="step-desc">
+                Executar <code>npm install</code> no diretório do projeto para instalar todas as dependências, depois iniciar com <code>npm start</code> ou <code>node index.js</code>. 
+                O servidor exibirá na inicialização a URL do webhook e alertas caso alguma credencial esteja faltando.
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">5</div>
+            <div class="step-content">
+              <div class="step-title">Validação e testes em produção</div>
+              <div class="step-desc">
+                Enviar mensagens de teste para o número WhatsApp conectado à instância do ClickMassa e verificar se o bot responde corretamente. 
+                Confirmar o envio de fotos do catálogo, o funcionamento do indicador de "digitando" e a notificação de leads para a equipe interna.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="alert info">
+          <div class="alert-icon">ℹ️</div>
+          <p>
+            <strong>Sobre o formato da API:</strong> A implementação já está preparada para o formato <strong>Evolution API</strong>, que é o mais comum nas integrações ClickMassa. Caso a instância utilize um formato de payload diferente, um ajuste pontual na função de leitura de mensagens será necessário — algo rápido de resolver com a documentação da instância em mãos.
+          </p>
+        </div>
+
+        <div class="alert warning">
+          <div class="alert-icon">⚠️</div>
+          <p>
+            <strong>Ponto de atenção:</strong> As credenciais da API do ClickMassa (<code>CM_API_URL</code>, <code>CM_TOKEN</code> e <code>CM_INSTANCE</code>) são essenciais. Sem elas, o servidor receberá as mensagens normalmente, mas <strong>não conseguirá responder</strong>. É o único ponto de dependência externa que impede a operação completa no momento.
+          </p>
+        </div>
+
+      </div>
+
+    </div><!-- /body -->
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <p><strong>Bonés Ramalho</strong> — Bot de Atendimento Inteligente</p>
+      <p>Documento técnico confidencial · Março de 2026</p>
+    </div>
+
+  </div>
+</body>
+</html>

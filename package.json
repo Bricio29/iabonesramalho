@@ -1,0 +1,32 @@
+{
+  "name": "bonesramalho",
+  "version": "2.0.0",
+  "description": "IA Bonés Ramalho — Webhook Mode (ClickMassa)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [
+    "whatsapp",
+    "webhook",
+    "crm",
+    "clickmassa",
+    "ia",
+    "bones",
+    "personalizados",
+    "openai"
+  ],
+  "author": "Bonés Ramalho",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.22.1",
+    "form-data": "^4.0.5",
+    "openai": "^4.20.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

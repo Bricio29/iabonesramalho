@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -c index.js)",
+      "WebSearch",
+      "WebFetch(domain:doc.clickup.com)",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "WebFetch(domain:docs-68.gitbook.io)"
+    ]
+  }
+}
