@@ -1545,18 +1545,16 @@ function parsePayload(body) {
 
         // --- Formato alternativo simples (fallback) ---
         // { "from": "5584...", "type": "text", "body": "Olá", "fromMe": false }
-        if (body?.from && body?.body !== undefined) {
-            if (body.fromMe) return null;
-            const phone = normalizarPhone(body.from);
+        if (body && body.numero_cliente && body.mensagem_cliente !== undefined) {
+            const phone = normalizarPhone(body.numero_cliente);
             if (!phone) return null;
-
             return {
-                chatId:      phone,
-                texto:       (body.body || '').trim(),
-                tipo:        body.type || 'text',
-                mediaBase64: body.mediaBase64 || null,
-                mediaMimetype: body.mediaMimetype || null,
-                quotedText:  body.quotedText || null
+              chatId:        phone,
+              texto:         String(body.mensagem_cliente || '').trim(),
+              tipo:          'text',
+              mediaBase64:   null,
+              mediaMimetype: null,
+              quotedText:    null
             };
         }
 
